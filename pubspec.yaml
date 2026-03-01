@@ -10,11 +10,12 @@ environment:
 dependencies:
   cached_network_image: ^3.4.1
   cupertino_icons: ^1.0.8
+  firebase_ai: ^3.8.0
   firebase_app_check: ^0.4.1+4
   firebase_core: ^4.4.0
-  firebase_vertexai: ^2.2.0
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
   gap: ^3.0.1
   google_generative_ai: ^0.4.7
   image_picker: ^1.2.1
