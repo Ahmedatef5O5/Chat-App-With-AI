@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => ChatCubit(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Chat with AI',
         theme: AppTheme.themeData,
         initialRoute: AppRoutes.chat,

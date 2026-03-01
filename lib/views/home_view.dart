@@ -1,5 +1,7 @@
+import 'package:chat_app_with_ai/utilities/constants/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import '../chat_cubit/chat_cubit.dart';
 import '../models/message_model.dart';
 import '../widgets/chat_bubble_widget.dart';
@@ -29,11 +31,23 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home view'), centerTitle: true),
+      appBar: AppBar(title: const Text('Chat view'), centerTitle: true),
       body: Column(
         children: [
           Expanded(
-            child: BlocBuilder<ChatCubit, ChatState>(
+            child: BlocConsumer<ChatCubit, ChatState>(
+              listenWhen: (previous, current) => current is ChatFailure,
+
+              listener: (BuildContext context, ChatState state) {
+                if (state is ChatFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.errMessage),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
+              },
               builder: (context, state) {
                 List<MessageModel> messages = [];
 
@@ -45,7 +59,6 @@ class _HomeViewState extends State<HomeView> {
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    // final message = messages.reversed.toList()[index];
                     final message = messages[messages.length - 1 - index];
                     return ChatBubble(message: message);
                   },
@@ -67,14 +80,28 @@ class _HomeViewState extends State<HomeView> {
           Expanded(
             child: TextField(
               controller: _controller,
-              decoration: const InputDecoration(hintText: 'اسأل Gemini...'),
+              decoration: const InputDecoration(hintText: 'Ask Gemini...'),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: () {
-              context.read<ChatCubit>().sendMessage(_controller.text);
-              _controller.clear();
+          BlocBuilder<ChatCubit, ChatState>(
+            builder: (context, state) {
+              final isLoading =
+                  state is ChatLoading &&
+                  state.messages.isNotEmpty &&
+                  state.messages.last.isLoading;
+
+              return IconButton(
+                icon: const Icon(Icons.send),
+                onPressed:
+                    isLoading
+                        ? null
+                        : () {
+                          context.read<ChatCubit>().sendMessage(
+                            _controller.text,
+                          );
+                          _controller.clear();
+                        },
+              );
             },
           ),
         ],

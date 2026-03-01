@@ -16,21 +16,29 @@ class ChatCubit extends Cubit<ChatState> {
     _allMessages.add(
       MessageModel(text: userText, isUser: true, time: DateTime.now()),
     );
-
+    _allMessages.add(
+      MessageModel(
+        text: userText,
+        isUser: false,
+        isLoading: true,
+        time: DateTime.now(),
+      ),
+    );
     emit(ChatLoading(List.from(_allMessages)));
-
     try {
       final aiResponse = await _chatService.sendMessage(userText);
+      _allMessages.removeLast();
       _allMessages.add(
         MessageModel(
-          text: aiResponse ?? 'No Results',
           isUser: false,
+          text: aiResponse ?? 'Error',
           time: DateTime.now(),
         ),
       );
 
       emit(ChatLoading(List.from(_allMessages)));
     } catch (e) {
+      _allMessages.removeLast();
       emit(
         ChatFailure(
           'There is an Error: ${e.toString()}',

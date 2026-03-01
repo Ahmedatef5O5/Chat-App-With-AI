@@ -3,18 +3,26 @@ import 'dart:convert';
 class MessageModel {
   final String text;
   final bool isUser;
+  final bool isLoading;
   final DateTime time;
 
   const MessageModel({
-    required this.text,
+    this.text = '',
     required this.isUser,
+    this.isLoading = false,
     required this.time,
   });
 
-  MessageModel copyWith({String? text, bool? isUser, DateTime? time}) {
+  MessageModel copyWith({
+    String? text,
+    bool? isUser,
+    bool? isLoading,
+    DateTime? time,
+  }) {
     return MessageModel(
       text: text ?? this.text,
       isUser: isUser ?? this.isUser,
+      isLoading: isLoading ?? this.isLoading,
       time: time ?? this.time,
     );
   }
@@ -23,6 +31,7 @@ class MessageModel {
     return <String, dynamic>{
       'text': text,
       'isUser': isUser,
+      'isLoading': isLoading,
       'time': time.millisecondsSinceEpoch,
     };
   }
@@ -31,6 +40,7 @@ class MessageModel {
     return MessageModel(
       text: map['text'] as String? ?? '',
       isUser: map['isUser'] as bool? ?? true,
+      isLoading: map['isLoading'] as bool? ?? false,
       time: DateTime.fromMillisecondsSinceEpoch(map['time'] as int? ?? 0),
     );
   }
