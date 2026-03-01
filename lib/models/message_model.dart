@@ -29,9 +29,9 @@ class MessageModel {
 
   factory MessageModel.fromMap(Map<String, dynamic> map) {
     return MessageModel(
-      text: map['text'] as String,
-      isUser: map['isUser'] as bool,
-      time: DateTime.fromMillisecondsSinceEpoch(map['time'] as int),
+      text: map['text'] as String? ?? '',
+      isUser: map['isUser'] as bool? ?? true,
+      time: DateTime.fromMillisecondsSinceEpoch(map['time'] as int? ?? 0),
     );
   }
 

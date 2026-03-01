@@ -28,6 +28,8 @@ class ChatCubit extends Cubit<ChatState> {
           time: DateTime.now(),
         ),
       );
+
+      emit(ChatLoading(List.from(_allMessages)));
     } catch (e) {
       emit(
         ChatFailure(
