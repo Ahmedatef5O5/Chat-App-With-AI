@@ -1,7 +1,5 @@
-import 'package:chat_app_with_ai/utilities/constants/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import '../chat_cubit/chat_cubit.dart';
 import '../models/message_model.dart';
 import '../widgets/chat_bubble_widget.dart';
