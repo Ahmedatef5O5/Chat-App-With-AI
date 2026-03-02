@@ -61,6 +61,13 @@ class ChatCubit extends Cubit<ChatState> {
             'Content blocked: This request violates safety policies.';
       }
       _allMessages.removeLast();
+      _allMessages.add(
+        MessageModel(
+          isUser: false,
+          time: DateTime.now(),
+          text: "Error: $errorMessage",
+        ),
+      );
       emit(ChatFailure(errorMessage, List.from(_allMessages)));
     }
   }

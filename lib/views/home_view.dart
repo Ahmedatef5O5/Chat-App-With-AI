@@ -61,6 +61,7 @@ class _HomeViewState extends State<HomeView> {
                       duration: const Duration(seconds: 3),
                     ),
                   );
+                  _scrollToBottom();
                 } else if (state is ChatSuccess) {
                   _scrollToBottom();
                 }
