@@ -31,20 +31,37 @@ class ChatCubit extends Cubit<ChatState> {
       _allMessages.add(
         MessageModel(
           isUser: false,
-          text: aiResponse ?? 'Error',
+          text: aiResponse ?? 'No response received.',
           time: DateTime.now(),
         ),
       );
 
       emit(ChatLoading(List.from(_allMessages)));
     } catch (e) {
+      String errorMessage = 'An unexpected error occurred. Please try again.';
+
+      final errorString = e.toString().toLowerCase();
+
+      if (errorString.contains('network') || errorString.contains('socket')) {
+        errorMessage =
+            'Connection failed. Please check your internet and try again.';
+      } else if (errorString.contains('quota') || errorString.contains('429')) {
+        errorMessage =
+            'Rate limit exceeded. Please wait a moment before sending more messages.';
+      } else if (errorString.contains('api key') ||
+          errorString.contains('invalid')) {
+        errorMessage = 'Authentication error. Please contact the developer.';
+      } else if (errorString.contains('high demand') ||
+          errorString.contains('503') ||
+          errorString.contains('unavailable')) {
+        errorMessage =
+            'Gemini is currently busy. Please try again in a few seconds.';
+      } else if (errorString.contains('safety')) {
+        errorMessage =
+            'Content blocked: This request violates safety policies.';
+      }
       _allMessages.removeLast();
-      emit(
-        ChatFailure(
-          'There is an Error: ${e.toString()}',
-          List.from(_allMessages),
-        ),
-      );
+      emit(ChatFailure(errorMessage, List.from(_allMessages)));
     }
   }
 }
