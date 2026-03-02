@@ -1,5 +1,6 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import '../models/message_model.dart';
@@ -70,14 +71,36 @@ class ChatBubble extends StatelessWidget {
                           ),
                           child:
                               message.isUser
-                                  ? Text(
-                                    message.text,
-                                    style: TextStyle(
-                                      color:
-                                          message.isUser
-                                              ? Colors.white
-                                              : Colors.black,
-                                    ),
+                                  ? Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      if (message.image != null)
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          child: Image.file(
+                                            message.image!,
+                                            height: 175,
+                                            width:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width -
+                                                200,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                      Gap(12),
+                                      Text(
+                                        message.text,
+                                        style: TextStyle(
+                                          color:
+                                              message.isUser
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                        ),
+                                      ),
+                                    ],
                                   )
                                   : (animate && !message.isLoading)
                                   ? AnimatedTextKit(

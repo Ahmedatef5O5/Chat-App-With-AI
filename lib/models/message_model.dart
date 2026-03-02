@@ -1,16 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 
 class MessageModel {
   final String text;
   final bool isUser;
   final bool isLoading;
   final DateTime time;
+  final File? image;
 
   const MessageModel({
     this.text = '',
     required this.isUser,
     this.isLoading = false,
     required this.time,
+    this.image,
   });
 
   MessageModel copyWith({
@@ -18,12 +21,14 @@ class MessageModel {
     bool? isUser,
     bool? isLoading,
     DateTime? time,
+    File? image,
   }) {
     return MessageModel(
       text: text ?? this.text,
       isUser: isUser ?? this.isUser,
       isLoading: isLoading ?? this.isLoading,
       time: time ?? this.time,
+      image: image ?? this.image,
     );
   }
 

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:chat_app_with_ai/models/message_model.dart';
+import 'package:chat_app_with_ai/services/native_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../services/chat_services.dart';
@@ -8,13 +11,20 @@ class ChatCubit extends Cubit<ChatState> {
   ChatCubit() : super(ChatInitial());
 
   final _chatService = ChatService();
+  final _nativeService = NativeServices();
 
   final List<MessageModel> _allMessages = [];
+  File? selectedImage;
 
   Future<void> sendMessage(String userText) async {
     if (userText.trim().isEmpty) return;
     _allMessages.add(
-      MessageModel(text: userText, isUser: true, time: DateTime.now()),
+      MessageModel(
+        text: userText,
+        isUser: true,
+        time: DateTime.now(),
+        image: selectedImage,
+      ),
     );
     _allMessages.add(
       MessageModel(
@@ -26,7 +36,10 @@ class ChatCubit extends Cubit<ChatState> {
     );
     emit(ChatLoading(List.from(_allMessages)));
     try {
-      final aiResponse = await _chatService.sendMessage(userText);
+      final aiResponse = await _chatService.sendMessage(
+        userText,
+        selectedImage,
+      );
       _allMessages.removeLast();
       _allMessages.add(
         MessageModel(
@@ -70,5 +83,18 @@ class ChatCubit extends Cubit<ChatState> {
       );
       emit(ChatFailure(errorMessage, List.from(_allMessages)));
     }
+  }
+
+  Future<void> pickImage() async {
+    final image = await _nativeService.pickImage();
+    if (image != null) {
+      selectedImage = image;
+      emit(ImagePicked(image, List.from(_allMessages)));
+    }
+  }
+
+  void removeImage() {
+    selectedImage = null;
+    emit(ImageRemoved(List.from(_allMessages)));
   }
 }

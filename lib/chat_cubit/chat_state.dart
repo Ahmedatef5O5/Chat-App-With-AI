@@ -22,3 +22,15 @@ final class ChatFailure extends ChatState {
 
   ChatFailure(this.errMessage, this.messages);
 }
+
+final class ImagePicked extends ChatState {
+  final File image;
+  final List<MessageModel> messages;
+  ImagePicked(this.image, this.messages);
+}
+
+final class ImageRemoved extends ChatState {
+  final List<MessageModel> messages;
+
+  ImageRemoved(this.messages);
+}

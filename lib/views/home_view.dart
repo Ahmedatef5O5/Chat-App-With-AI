@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 import '../chat_cubit/chat_cubit.dart';
 import '../models/message_model.dart';
 import '../widgets/chat_bubble_widget.dart';
@@ -74,6 +75,8 @@ class _HomeViewState extends State<HomeView> {
                   if (state is ChatSuccess) messages = state.messages;
                   if (state is ChatLoading) messages = state.messages;
                   if (state is ChatFailure) messages = state.messages;
+                  if (state is ImagePicked) messages = state.messages;
+                  if (state is ImageRemoved) messages = state.messages;
 
                   return ListView.builder(
                     controller: _scrollController,
@@ -97,38 +100,103 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildInputArea(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: TextField(
-              minLines: 1,
-              maxLines: 6,
-              keyboardType: TextInputType.multiline,
-              controller: _controller,
-              decoration: const InputDecoration(hintText: 'Ask Gemini...'),
-            ),
-          ),
           BlocBuilder<ChatCubit, ChatState>(
+            buildWhen:
+                (previous, current) =>
+                    current is ImagePicked || current is ImageRemoved,
             builder: (context, state) {
-              final isLoading =
-                  state is ChatLoading &&
-                  state.messages.isNotEmpty &&
-                  state.messages.last.isLoading;
-
-              return IconButton(
-                icon: const Icon(Icons.send),
-                onPressed:
-                    isLoading
-                        ? null
-                        : () {
-                          context.read<ChatCubit>().sendMessage(
-                            _controller.text,
-                          );
-                          _controller.clear();
-                          _scrollToBottom();
-                        },
-              );
+              if (state is ImagePicked) {
+                return SizedBox(
+                  height: 200,
+                  width: MediaQuery.of(context).size.width - 100,
+                  child: Card(
+                    color: Colors.white,
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.file(
+                            state.image,
+                            width: MediaQuery.of(context).size.width - 70,
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: const Icon(Icons.close),
+                              ),
+                              onTap:
+                                  () =>
+                                      BlocProvider.of<ChatCubit>(
+                                        context,
+                                      ).removeImage(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
             },
+          ),
+          Gap(10),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  minLines: 1,
+                  maxLines: 6,
+                  keyboardType: TextInputType.multiline,
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Ask Gemini...',
+                    suffixIcon: InkWell(
+                      child: const Icon(Icons.camera_alt),
+                      onTap:
+                          () async =>
+                              BlocProvider.of<ChatCubit>(context).pickImage(),
+                    ),
+                  ),
+                ),
+              ),
+              BlocBuilder<ChatCubit, ChatState>(
+                builder: (context, state) {
+                  final isLoading =
+                      state is ChatLoading &&
+                      state.messages.isNotEmpty &&
+                      state.messages.last.isLoading;
+
+                  return IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed:
+                        isLoading
+                            ? null
+                            : () {
+                              context.read<ChatCubit>().sendMessage(
+                                _controller.text,
+                              );
+                              _controller.clear();
+                              BlocProvider.of<ChatCubit>(context).removeImage();
+                              _scrollToBottom();
+                            },
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
