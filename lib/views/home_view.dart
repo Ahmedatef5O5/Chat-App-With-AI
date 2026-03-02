@@ -42,51 +42,54 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Chat view'), centerTitle: true),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocConsumer<ChatCubit, ChatState>(
-              listenWhen:
-                  (previous, current) =>
-                      current is ChatFailure || current is ChatSuccess,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Chat view'), centerTitle: true),
+        body: Column(
+          children: [
+            Expanded(
+              child: BlocConsumer<ChatCubit, ChatState>(
+                listenWhen:
+                    (previous, current) =>
+                        current is ChatFailure || current is ChatSuccess,
 
-              listener: (BuildContext context, ChatState state) {
-                if (state is ChatFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.errMessage),
-                      backgroundColor: Colors.redAccent,
-                      duration: const Duration(seconds: 3),
-                    ),
+                listener: (BuildContext context, ChatState state) {
+                  if (state is ChatFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.errMessage),
+                        backgroundColor: Colors.redAccent,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                    _scrollToBottom();
+                  } else if (state is ChatSuccess) {
+                    _scrollToBottom();
+                  }
+                },
+                builder: (context, state) {
+                  List<MessageModel> messages = [];
+
+                  if (state is ChatSuccess) messages = state.messages;
+                  if (state is ChatLoading) messages = state.messages;
+                  if (state is ChatFailure) messages = state.messages;
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    reverse: true,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages.reversed.toList()[index];
+                      return ChatBubble(message: message, animate: index == 0);
+                    },
                   );
-                  _scrollToBottom();
-                } else if (state is ChatSuccess) {
-                  _scrollToBottom();
-                }
-              },
-              builder: (context, state) {
-                List<MessageModel> messages = [];
-
-                if (state is ChatSuccess) messages = state.messages;
-                if (state is ChatLoading) messages = state.messages;
-                if (state is ChatFailure) messages = state.messages;
-
-                return ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages.reversed.toList()[index];
-                    return ChatBubble(message: message);
-                  },
-                );
-              },
+                },
+              ),
             ),
-          ),
-          _buildInputArea(context),
-        ],
+            _buildInputArea(context),
+          ],
+        ),
       ),
     );
   }
@@ -98,6 +101,9 @@ class _HomeViewState extends State<HomeView> {
         children: [
           Expanded(
             child: TextField(
+              minLines: 1,
+              maxLines: 6,
+              keyboardType: TextInputType.multiline,
               controller: _controller,
               decoration: const InputDecoration(hintText: 'Ask Gemini...'),
             ),
