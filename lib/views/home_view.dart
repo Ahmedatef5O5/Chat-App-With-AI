@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -38,6 +39,31 @@ class _HomeViewState extends State<HomeView> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       ),
+    );
+  }
+
+  void showOptions() {
+    showCupertinoModalPopup(
+      context: context,
+      builder:
+          (_) => CupertinoActionSheet(
+            actions: [
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  Navigator.pop(context);
+                  BlocProvider.of<ChatCubit>(context).pickImageFromCamera();
+                },
+                child: const Text('Camera'),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  BlocProvider.of<ChatCubit>(context).pickImageFromGallery();
+                  Navigator.pop(context);
+                },
+                child: const Text('Gallery'),
+              ),
+            ],
+          ),
     );
   }
 
@@ -165,10 +191,8 @@ class _HomeViewState extends State<HomeView> {
                   decoration: InputDecoration(
                     hintText: 'Ask Gemini...',
                     suffixIcon: InkWell(
-                      child: const Icon(Icons.camera_alt),
-                      onTap:
-                          () async =>
-                              BlocProvider.of<ChatCubit>(context).pickImage(),
+                      child: const Icon(Icons.attachment),
+                      onTap: () async => showOptions(),
                     ),
                   ),
                 ),
