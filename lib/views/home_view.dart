@@ -13,17 +13,31 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late final TextEditingController _controller;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _scrollController.animateTo(
+        // _scrollController.position.maxScrollExtent,
+        0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -34,7 +48,9 @@ class _HomeViewState extends State<HomeView> {
         children: [
           Expanded(
             child: BlocConsumer<ChatCubit, ChatState>(
-              listenWhen: (previous, current) => current is ChatFailure,
+              listenWhen:
+                  (previous, current) =>
+                      current is ChatFailure || current is ChatSuccess,
 
               listener: (BuildContext context, ChatState state) {
                 if (state is ChatFailure) {
@@ -42,8 +58,11 @@ class _HomeViewState extends State<HomeView> {
                     SnackBar(
                       content: Text(state.errMessage),
                       backgroundColor: Colors.redAccent,
+                      duration: const Duration(seconds: 3),
                     ),
                   );
+                } else if (state is ChatSuccess) {
+                  _scrollToBottom();
                 }
               },
               builder: (context, state) {
@@ -54,10 +73,11 @@ class _HomeViewState extends State<HomeView> {
                 if (state is ChatFailure) messages = state.messages;
 
                 return ListView.builder(
+                  controller: _scrollController,
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = messages[messages.length - 1 - index];
+                    final message = messages.reversed.toList()[index];
                     return ChatBubble(message: message);
                   },
                 );
@@ -98,6 +118,7 @@ class _HomeViewState extends State<HomeView> {
                             _controller.text,
                           );
                           _controller.clear();
+                          _scrollToBottom();
                         },
               );
             },
