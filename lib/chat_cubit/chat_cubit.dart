@@ -16,7 +16,7 @@ class ChatCubit extends Cubit<ChatState> {
   final _chatService = ChatService();
   final _nativeService = NativeServices();
 
-  final List<MessageModel> _allMessages = [];
+  final List<MessageModel> allMessages = [];
   File? selectedImage, selectedFile, selectedAudio;
 
   Future<void> sendMessage(String userText) async {
@@ -26,7 +26,7 @@ class ChatCubit extends Cubit<ChatState> {
         selectedAudio == null) {
       return;
     }
-    _allMessages.add(
+    allMessages.add(
       MessageModel(
         text: userText,
         isUser: true,
@@ -36,7 +36,7 @@ class ChatCubit extends Cubit<ChatState> {
         audio: selectedAudio,
       ),
     );
-    _allMessages.add(
+    allMessages.add(
       MessageModel(
         text: userText,
         isUser: false,
@@ -44,7 +44,7 @@ class ChatCubit extends Cubit<ChatState> {
         time: DateTime.now(),
       ),
     );
-    emit(ChatLoading(List.from(_allMessages)));
+    emit(ChatLoading(List.from(allMessages)));
     try {
       final aiResponse = await _chatService.sendMessage(
         userText,
@@ -52,8 +52,8 @@ class ChatCubit extends Cubit<ChatState> {
         selectedFile,
         selectedAudio,
       );
-      _allMessages.removeLast();
-      _allMessages.add(
+      allMessages.removeLast();
+      allMessages.add(
         MessageModel(
           isUser: false,
           text: aiResponse ?? 'No response received.',
@@ -65,7 +65,7 @@ class ChatCubit extends Cubit<ChatState> {
       selectedImage = null;
       selectedFile = null;
       selectedAudio = null;
-      emit(ChatSuccess(List.from(_allMessages)));
+      emit(ChatSuccess(List.from(allMessages)));
     } catch (e) {
       String errorMessage = 'An unexpected error occurred. Please try again.';
 
@@ -89,15 +89,15 @@ class ChatCubit extends Cubit<ChatState> {
         errorMessage =
             'Content blocked: This request violates safety policies.';
       }
-      _allMessages.removeLast();
-      _allMessages.add(
+      allMessages.removeLast();
+      allMessages.add(
         MessageModel(
           isUser: false,
           time: DateTime.now(),
           text: "Error: $errorMessage",
         ),
       );
-      emit(ChatFailure(errorMessage, List.from(_allMessages)));
+      emit(ChatFailure(errorMessage, List.from(allMessages)));
     }
   }
 
@@ -105,13 +105,13 @@ class ChatCubit extends Cubit<ChatState> {
     final file = await _nativeService.pickFile();
     if (file != null) {
       selectedFile = file;
-      emit(FilePicked(List.from(_allMessages), file));
+      emit(FilePicked(List.from(allMessages), file));
     }
   }
 
   void removeFile() {
     selectedFile = null;
-    emit(FileRemoved(List.from(_allMessages)));
+    emit(FileRemoved(List.from(allMessages)));
   }
 
   Future<void> startRecording() async {
@@ -131,20 +131,20 @@ class ChatCubit extends Cubit<ChatState> {
     final path = await _nativeService.stopRecording();
     if (path != null) {
       selectedAudio = File(path);
-      emit(RecordingStarted(List.from(_allMessages), selectedAudio!));
+      emit(RecordingStarted(List.from(allMessages), selectedAudio!));
     }
   }
 
   void removeRecord() {
     selectedAudio = null;
-    emit(RecordRemoved(List.from(_allMessages)));
+    emit(RecordRemoved(List.from(allMessages)));
   }
 
   Future<void> pickImageFromCamera() async {
     final image = await _nativeService.pickImage(ImageSource.camera);
     if (image != null) {
       selectedImage = image;
-      emit(ImagePicked(image, List.from(_allMessages)));
+      emit(ImagePicked(image, List.from(allMessages)));
     }
   }
 
@@ -152,12 +152,12 @@ class ChatCubit extends Cubit<ChatState> {
     final image = await _nativeService.pickImage(ImageSource.gallery);
     if (image != null) {
       selectedImage = image;
-      emit(ImagePicked(image, List.from(_allMessages)));
+      emit(ImagePicked(image, List.from(allMessages)));
     }
   }
 
   void removeImage() {
     selectedImage = null;
-    emit(ImageRemoved(List.from(_allMessages)));
+    emit(ImageRemoved(List.from(allMessages)));
   }
 }

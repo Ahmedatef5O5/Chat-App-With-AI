@@ -9,8 +9,8 @@ class ChatService {
 
   ChatService() {
     _model = GenerativeModel(
-      model: 'gemini-2.0-flash',
-      // model: 'gemini-2.5-flash',
+      // model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       apiKey: AppConstants.apiKey,
     );
   }

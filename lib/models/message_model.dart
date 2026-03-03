@@ -7,6 +7,8 @@ class MessageModel {
   final bool isLoading;
   final DateTime time;
   final File? image;
+  final File? file;
+  final File? audio;
 
   const MessageModel({
     this.text = '',
@@ -14,6 +16,8 @@ class MessageModel {
     this.isLoading = false,
     required this.time,
     this.image,
+    this.file,
+    this.audio,
   });
 
   MessageModel copyWith({
@@ -22,6 +26,8 @@ class MessageModel {
     bool? isLoading,
     DateTime? time,
     File? image,
+    File? file,
+    File? audio,
   }) {
     return MessageModel(
       text: text ?? this.text,
@@ -29,6 +35,8 @@ class MessageModel {
       isLoading: isLoading ?? this.isLoading,
       time: time ?? this.time,
       image: image ?? this.image,
+      file: file ?? this.file,
+      audio: audio ?? this.audio,
     );
   }
 

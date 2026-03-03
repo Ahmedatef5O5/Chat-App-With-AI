@@ -1,3 +1,5 @@
+import 'package:chat_app_with_ai/widgets/file_preview_widget.dart';
+import 'package:chat_app_with_ai/widgets/image_preview_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,11 +18,15 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   late final TextEditingController _controller;
   late final ScrollController _scrollController;
+  bool _isTyping = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _controller.addListener(() {
+      _isTyping = _controller.text.isNotEmpty;
+    });
     _scrollController = ScrollController();
   }
 
@@ -62,6 +68,13 @@ class _HomeViewState extends State<HomeView> {
                 },
                 child: const Text('Gallery'),
               ),
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  BlocProvider.of<ChatCubit>(context).pickDocument();
+                  Navigator.pop(context);
+                },
+                child: const Text('Document (PDF/Word)'),
+              ),
             ],
           ),
     );
@@ -69,6 +82,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final chatCubit = BlocProvider.of<ChatCubit>(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -96,13 +110,14 @@ class _HomeViewState extends State<HomeView> {
                   }
                 },
                 builder: (context, state) {
-                  List<MessageModel> messages = [];
+                  // List<MessageModel> messages = [];
 
-                  if (state is ChatSuccess) messages = state.messages;
-                  if (state is ChatLoading) messages = state.messages;
-                  if (state is ChatFailure) messages = state.messages;
-                  if (state is ImagePicked) messages = state.messages;
-                  if (state is ImageRemoved) messages = state.messages;
+                  // if (state is ChatSuccess) messages = state.messages;
+                  // if (state is ChatLoading) messages = state.messages;
+                  // if (state is ChatFailure) messages = state.messages;
+                  // if (state is ImagePicked) messages = state.messages;
+                  // if (state is ImageRemoved) messages = state.messages;
+                  final messages = chatCubit.allMessages;
 
                   return ListView.builder(
                     controller: _scrollController,
@@ -124,6 +139,7 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildInputArea(BuildContext context) {
+    final chatCubit = BlocProvider.of<ChatCubit>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -132,50 +148,77 @@ class _HomeViewState extends State<HomeView> {
           BlocBuilder<ChatCubit, ChatState>(
             buildWhen:
                 (previous, current) =>
-                    current is ImagePicked || current is ImageRemoved,
+                    current is ImagePicked ||
+                    current is ImageRemoved ||
+                    current is FilePicked ||
+                    current is FileRemoved ||
+                    current is RecordingStarted ||
+                    current is RecordRemoved,
             builder: (context, state) {
               if (state is ImagePicked) {
-                return SizedBox(
-                  height: 200,
-                  width: MediaQuery.of(context).size.width - 100,
-                  child: Card(
-                    color: Colors.white,
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.file(
-                            state.image,
-                            width: MediaQuery.of(context).size.width - 70,
-                            fit: BoxFit.fill,
-                          ),
-                        ),
-                        Positioned(
-                          top: 5,
-                          right: 5,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: InkWell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: const Icon(Icons.close),
-                              ),
-                              onTap:
-                                  () =>
-                                      BlocProvider.of<ChatCubit>(
-                                        context,
-                                      ).removeImage(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                return ImagePreviewWidget(
+                  image: state.image,
+                  onRemove: () => chatCubit.removeImage(),
                 );
               }
+
+              if (state is FilePicked) {
+                return FilePreviewWidget(
+                  title: state.file.path.split('/').last,
+                  icon: Icons.description,
+                  onRemove: () => chatCubit.removeFile(),
+                );
+              }
+              if (state is RecordingStarted) {
+                return FilePreviewWidget(
+                  title: "Voice Message",
+                  icon: Icons.mic,
+                  iconColor: Colors.red,
+                  onRemove: () => chatCubit.removeRecord(),
+                );
+              }
+
+              // return SizedBox(
+              //   height: 200,
+              //   width: MediaQuery.of(context).size.width - 100,
+              //   child: Card(
+              //     color: Colors.white,
+              //     child: Stack(
+              //       children: [
+              //         ClipRRect(
+              //           borderRadius: BorderRadius.circular(16),
+              //           child: Image.file(
+              //             state.image,
+              //             width: MediaQuery.of(context).size.width - 70,
+              //             fit: BoxFit.fill,
+              //           ),
+              //         ),
+              //         Positioned(
+              //           top: 5,
+              //           right: 5,
+              //           child: DecoratedBox(
+              //             decoration: BoxDecoration(
+              //               color: Colors.white,
+              //               shape: BoxShape.circle,
+              //             ),
+              //             child: InkWell(
+              //               child: Padding(
+              //                 padding: const EdgeInsets.all(4.0),
+              //                 child: const Icon(Icons.close),
+              //               ),
+              //               onTap: () {
+              //                 chatCubit.removeImage();
+              //                 chatCubit.removeFile();
+              //                 chatCubit.removeRecord();
+              //               },
+              //             ),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // );
+
               return const SizedBox.shrink();
             },
           ),
@@ -188,6 +231,10 @@ class _HomeViewState extends State<HomeView> {
                   maxLines: 6,
                   keyboardType: TextInputType.multiline,
                   controller: _controller,
+                  onChanged:
+                      (text) => setState(() {
+                        _isTyping = text.isNotEmpty;
+                      }),
                   decoration: InputDecoration(
                     hintText: 'Ask Gemini...',
                     suffixIcon: InkWell(
@@ -199,25 +246,44 @@ class _HomeViewState extends State<HomeView> {
               ),
               BlocBuilder<ChatCubit, ChatState>(
                 builder: (context, state) {
+                  final isRecording = state is RecordingStarted;
                   final isLoading =
                       state is ChatLoading &&
                       state.messages.isNotEmpty &&
                       state.messages.last.isLoading;
-
-                  return IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed:
-                        isLoading
-                            ? null
-                            : () {
-                              context.read<ChatCubit>().sendMessage(
-                                _controller.text,
-                              );
-                              _controller.clear();
-                              BlocProvider.of<ChatCubit>(context).removeImage();
-                              _scrollToBottom();
-                            },
-                  );
+                  if (_isTyping ||
+                      chatCubit.selectedFile != null ||
+                      chatCubit.selectedImage != null) {
+                    return IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () {
+                                context.read<ChatCubit>().sendMessage(
+                                  _controller.text,
+                                );
+                                _controller.clear();
+                                chatCubit.removeImage();
+                                chatCubit.removeFile();
+                                chatCubit.removeRecord();
+                                _scrollToBottom();
+                              },
+                    );
+                  } else {
+                    return GestureDetector(
+                      onLongPressStart: (_) => chatCubit.startRecording(),
+                      onLongPressEnd: (_) => chatCubit.stopRecordingAndSave(),
+                      child: Icon(
+                        Icons.mic,
+                        color: isRecording ? Colors.red : Colors.grey,
+                      ),
+                      onTap:
+                          () => ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Hold to record')),
+                          ),
+                    );
+                  }
                 },
               ),
             ],
