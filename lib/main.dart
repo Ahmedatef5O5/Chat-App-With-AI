@@ -1,5 +1,6 @@
 import 'package:chat_app_with_ai/Router/app_router.dart';
 import 'package:chat_app_with_ai/Router/app_routes.dart';
+import 'package:chat_app_with_ai/cubits/auth_cubit/auth_cubit.dart';
 import 'package:chat_app_with_ai/cubits/chat_cubit/chat_cubit.dart';
 import 'package:chat_app_with_ai/firebase_options.dart';
 import 'package:chat_app_with_ai/utilities/theme/app_theme.dart';
@@ -31,8 +32,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ChatCubit()),
+        BlocProvider(create: (context) => AuthCubit()),
+      ],
       child: MaterialApp(
         useInheritedMediaQuery: true,
         locale: DevicePreview.locale(context),
@@ -41,7 +45,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Chat with AI',
         theme: AppTheme.themeData,
-        initialRoute: AppRoutes.chat,
+        // home: RegisterView(),
+        initialRoute: AppRoutes.register,
         onGenerateRoute: AppRouter.onGenerateRoute,
       ),
     );
