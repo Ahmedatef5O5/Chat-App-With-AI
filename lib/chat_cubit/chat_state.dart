@@ -34,3 +34,29 @@ final class ImageRemoved extends ChatState {
 
   ImageRemoved(this.messages);
 }
+
+final class FilePicked extends ChatState {
+  final File file;
+  final List<MessageModel> messages;
+
+  FilePicked(this.messages, this.file);
+}
+
+final class FileRemoved extends ChatState {
+  final List<MessageModel> messages;
+
+  FileRemoved(this.messages);
+}
+
+final class RecordingStarted extends ChatState {
+  final File record;
+  final List<MessageModel> messages;
+
+  RecordingStarted(this.messages, this.record);
+}
+
+final class RecordRemoved extends ChatState {
+  final List<MessageModel> messages;
+
+  RecordRemoved(this.messages);
+}

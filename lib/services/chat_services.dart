@@ -9,7 +9,8 @@ class ChatService {
 
   ChatService() {
     _model = GenerativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
+      // model: 'gemini-2.5-flash',
       apiKey: AppConstants.apiKey,
     );
   }
@@ -18,17 +19,26 @@ class ChatService {
     _chatSession = _model.startChat();
   }
 
-  Future<String?> sendMessage(String message, [File? image]) async {
-    late final Content content;
+  Future<String?> sendMessage(
+    String message, [
+    File? image,
+    File? file,
+    File? audio,
+  ]) async {
+    List<Part> parts = [TextPart(message)];
+
     if (image != null) {
-      final bytes = await image.readAsBytes();
-      content = Content.multi([
-        TextPart(message),
-        DataPart('image/jpeg', bytes),
-      ]);
-    } else {
-      content = Content.text(message);
+      parts.add(DataPart('image/jpeg', await image.readAsBytes()));
     }
+
+    if (file != null) {
+      parts.add(DataPart('application/pdf', await file.readAsBytes()));
+    }
+
+    if (audio != null) {
+      parts.add(DataPart('audio/m4a', await audio.readAsBytes()));
+    }
+    final content = Content.multi(parts);
     try {
       if (_chatSession == null) startChatSession();
 

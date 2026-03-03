@@ -90,6 +90,27 @@ class ChatBubble extends StatelessWidget {
                                             fit: BoxFit.fill,
                                           ),
                                         ),
+                                      if (message.file != null)
+                                        _buildFileBubble(
+                                          icon: Icons.description,
+                                          fileName:
+                                              message.file!.path
+                                                  .split('/')
+                                                  .last,
+                                          color:
+                                              message.isUser
+                                                  ? Colors.white24
+                                                  : Colors.grey.shade200,
+                                        ),
+                                      if (message.audio != null)
+                                        _buildFileBubble(
+                                          icon: Icons.mic,
+                                          fileName: "Voice Message",
+                                          color:
+                                              message.isUser
+                                                  ? Colors.white24
+                                                  : Colors.grey.shade200,
+                                        ),
                                       Gap(12),
                                       Text(
                                         message.text,
@@ -148,4 +169,33 @@ class ChatBubble extends StatelessWidget {
               ),
     );
   }
+}
+
+Widget _buildFileBubble({
+  required IconData icon,
+  required String fileName,
+  required Color color,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 24, color: Colors.blue),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            fileName,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
 }

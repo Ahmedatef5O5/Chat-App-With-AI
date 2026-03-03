@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:chat_app_with_ai/models/message_model.dart';
 import 'package:chat_app_with_ai/services/native_services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../services/chat_services.dart';
 part 'chat_state.dart';
@@ -15,16 +17,23 @@ class ChatCubit extends Cubit<ChatState> {
   final _nativeService = NativeServices();
 
   final List<MessageModel> _allMessages = [];
-  File? selectedImage;
+  File? selectedImage, selectedFile, selectedAudio;
 
   Future<void> sendMessage(String userText) async {
-    if (userText.trim().isEmpty) return;
+    if (userText.trim().isEmpty &&
+        selectedImage == null &&
+        selectedFile == null &&
+        selectedAudio == null) {
+      return;
+    }
     _allMessages.add(
       MessageModel(
         text: userText,
         isUser: true,
         time: DateTime.now(),
         image: selectedImage,
+        file: selectedFile,
+        audio: selectedAudio,
       ),
     );
     _allMessages.add(
@@ -40,6 +49,8 @@ class ChatCubit extends Cubit<ChatState> {
       final aiResponse = await _chatService.sendMessage(
         userText,
         selectedImage,
+        selectedFile,
+        selectedAudio,
       );
       _allMessages.removeLast();
       _allMessages.add(
@@ -50,7 +61,11 @@ class ChatCubit extends Cubit<ChatState> {
         ),
       );
 
-      emit(ChatLoading(List.from(_allMessages)));
+      // emit(ChatLoading(List.from(_allMessages)));
+      selectedImage = null;
+      selectedFile = null;
+      selectedAudio = null;
+      emit(ChatSuccess(List.from(_allMessages)));
     } catch (e) {
       String errorMessage = 'An unexpected error occurred. Please try again.';
 
@@ -84,6 +99,45 @@ class ChatCubit extends Cubit<ChatState> {
       );
       emit(ChatFailure(errorMessage, List.from(_allMessages)));
     }
+  }
+
+  Future<void> pickDocument() async {
+    final file = await _nativeService.pickFile();
+    if (file != null) {
+      selectedFile = file;
+      emit(FilePicked(List.from(_allMessages), file));
+    }
+  }
+
+  void removeFile() {
+    selectedFile = null;
+    emit(FileRemoved(List.from(_allMessages)));
+  }
+
+  Future<void> startRecording() async {
+    try {
+      var status = await Permission.microphone.request();
+      if (status.isGranted) {
+        await _nativeService.startRecording();
+      } else {
+        debugPrint('User cancel request to record');
+      }
+    } catch (e) {
+      debugPrint('Recording Error : $e');
+    }
+  }
+
+  Future<void> stopRecordingAndSave() async {
+    final path = await _nativeService.stopRecording();
+    if (path != null) {
+      selectedAudio = File(path);
+      emit(RecordingStarted(List.from(_allMessages), selectedAudio!));
+    }
+  }
+
+  void removeRecord() {
+    selectedAudio = null;
+    emit(RecordRemoved(List.from(_allMessages)));
   }
 
   Future<void> pickImageFromCamera() async {
