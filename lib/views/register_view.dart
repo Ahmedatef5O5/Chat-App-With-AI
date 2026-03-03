@@ -1,4 +1,6 @@
+import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/utilities/constants/app_colors.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../widgets/custom_elevated_button.dart';
@@ -6,14 +8,14 @@ import '../widgets/custom_text_form_field.dart';
 import '../widgets/social_auth_icons.dart';
 import '../widgets/terms_and_conditions_checkbox.dart';
 
-class RegiserView extends StatefulWidget {
-  const RegiserView({super.key});
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
 
   @override
-  State<RegiserView> createState() => _RegiserViewState();
+  State<RegisterView> createState() => _RegisterViewState();
 }
 
-class _RegiserViewState extends State<RegiserView> {
+class _RegisterViewState extends State<RegisterView> {
   bool _isAgreed = false;
 
   @override
@@ -107,7 +109,40 @@ class _RegiserViewState extends State<RegiserView> {
                           txtBtn: 'Create account',
                           onpreesed: () {},
                         ),
-                        Gap(16),
+                        Gap(8),
+                        Text.rich(
+                          TextSpan(
+                            text: 'Already have an account?',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleSmall!.copyWith(
+                              color: AppColors.blackColor38,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            children: [
+                              TextSpan(
+                                recognizer:
+                                    TapGestureRecognizer()
+                                      ..onTap =
+                                          () => Navigator.of(
+                                            context,
+                                          ).pushReplacementNamed(
+                                            AppRoutes.login,
+                                          ),
+                                text: ' Login',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleSmall!.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gap(18),
                         SocialAuthIcons(),
                         Gap(16),
                       ],
