@@ -1,3 +1,4 @@
+import 'package:chat_app_with_ai/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 
@@ -48,6 +49,15 @@ class AuthServicesImpl implements AuthServices {
           .createUserWithEmailAndPassword(email: email, password: password);
       final user = userCredential.user;
       if (user != null) {
+        await FirestoreServices.instance.setData(
+          path: 'users/${user.uid}',
+          data: {
+            'uid': user.uid,
+            'email': email,
+            'userName': userName,
+            'createdAt': DateTime.now().toIso8601String(),
+          },
+        );
         return true;
       } else {
         return false;
