@@ -1,11 +1,19 @@
 import 'package:chat_app_with_ai/utilities/constants/app_colors.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../widgets/custom_text_form_field.dart';
 
-class RegiserView extends StatelessWidget {
+class RegiserView extends StatefulWidget {
   const RegiserView({super.key});
+
+  @override
+  State<RegiserView> createState() => _RegiserViewState();
+}
+
+class _RegiserViewState extends State<RegiserView> {
+  bool _isAgreed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +85,53 @@ class RegiserView extends StatelessWidget {
                       hintText: 'Enter your Password',
                       isPassword: true,
                     ),
+                    Gap(12),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _isAgreed,
+                          activeColor: Theme.of(context).primaryColor,
+                          checkColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _isAgreed = value!;
+                            });
+                          },
+                        ),
+
+                        Text.rich(
+                          TextSpan(
+                            text: 'I agree to the',
+
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall!.copyWith(fontSize: 13),
+                            children: [
+                              TextSpan(
+                                text: ' \bTerms of Services',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall!.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                                recognizer:
+                                    TapGestureRecognizer()
+                                      ..onTap = () {
+                                        debugPrint('Terms tapped');
+                                      },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Gap(26),
                   ],
                 ),
               ),
