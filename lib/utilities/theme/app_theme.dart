@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   static ThemeData get themeData => ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+    primaryColor: Colors.blueAccent,
     useMaterial3: true,
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(

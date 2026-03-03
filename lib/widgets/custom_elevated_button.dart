@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../utilities/constants/app_colors.dart';
 
@@ -8,11 +9,13 @@ class CustomElevatedButton extends StatelessWidget {
     required this.onpreesed,
     this.bgColor,
     this.txtColor,
+    this.isLoading = false,
   });
   final String txtBtn;
-  final VoidCallback onpreesed;
+  final VoidCallback? onpreesed;
   final Color? bgColor;
   final Color? txtColor;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +26,15 @@ class CustomElevatedButton extends StatelessWidget {
       ),
 
       onPressed: onpreesed,
-      child: Text(
-        txtBtn,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium!.copyWith(color: txtColor ?? AppColors.white),
-      ),
+      child:
+          isLoading
+              ? CupertinoActivityIndicator(color: AppColors.blackColor12)
+              : Text(
+                txtBtn,
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: txtColor ?? AppColors.white,
+                ),
+              ),
     );
   }
 }

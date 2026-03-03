@@ -37,7 +37,7 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthFailure("Register failed. Try again."));
       }
     } catch (e) {
-      emit(AuthFailure('Register Failed: $e'));
+      emit(AuthFailure('Register Failed: $e.'));
     }
   }
 }

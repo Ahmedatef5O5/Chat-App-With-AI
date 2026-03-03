@@ -1,3 +1,5 @@
+import 'package:chat_app_with_ai/utilities/constants/app_colors.dart';
+import 'package:chat_app_with_ai/utilities/constants/app_images.dart';
 import 'package:chat_app_with_ai/widgets/file_preview_widget.dart';
 import 'package:chat_app_with_ai/widgets/image_preview_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -85,53 +87,54 @@ class _HomeViewState extends State<HomeView> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Chat view'), centerTitle: true),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocConsumer<ChatCubit, ChatState>(
-                listenWhen:
-                    (previous, current) =>
-                        current is ChatFailure || current is ChatSuccess,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('Chat view'),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: BlocConsumer<ChatCubit, ChatState>(
+                  listenWhen:
+                      (previous, current) =>
+                          current is ChatFailure || current is ChatSuccess,
 
-                listener: (BuildContext context, ChatState state) {
-                  if (state is ChatFailure) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.errMessage),
-                        backgroundColor: Colors.redAccent,
-                        duration: const Duration(seconds: 3),
-                      ),
+                  listener: (BuildContext context, ChatState state) {
+                    if (state is ChatFailure) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.errMessage),
+                          backgroundColor: Colors.redAccent,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                      _scrollToBottom();
+                    } else if (state is ChatSuccess) {
+                      _scrollToBottom();
+                    }
+                  },
+                  builder: (context, state) {
+                    final messages = chatCubit.allMessages;
+                    return ListView.builder(
+                      controller: _scrollController,
+                      reverse: true,
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages.reversed.toList()[index];
+                        return ChatBubble(
+                          message: message,
+                          animate: index == 0,
+                        );
+                      },
                     );
-                    _scrollToBottom();
-                  } else if (state is ChatSuccess) {
-                    _scrollToBottom();
-                  }
-                },
-                builder: (context, state) {
-                  // List<MessageModel> messages = [];
-
-                  // if (state is ChatSuccess) messages = state.messages;
-                  // if (state is ChatLoading) messages = state.messages;
-                  // if (state is ChatFailure) messages = state.messages;
-                  // if (state is ImagePicked) messages = state.messages;
-                  // if (state is ImageRemoved) messages = state.messages;
-                  final messages = chatCubit.allMessages;
-
-                  return ListView.builder(
-                    controller: _scrollController,
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages.reversed.toList()[index];
-                      return ChatBubble(message: message, animate: index == 0);
-                    },
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-            _buildInputArea(context),
-          ],
+              _buildInputArea(context),
+            ],
+          ),
         ),
       ),
     );
@@ -171,52 +174,11 @@ class _HomeViewState extends State<HomeView> {
               if (state is RecordingStarted) {
                 return FilePreviewWidget(
                   title: "Voice Message",
-                  icon: Icons.mic,
+                  icon: CupertinoIcons.mic,
                   iconColor: Colors.red,
                   onRemove: () => chatCubit.removeRecord(),
                 );
               }
-
-              // return SizedBox(
-              //   height: 200,
-              //   width: MediaQuery.of(context).size.width - 100,
-              //   child: Card(
-              //     color: Colors.white,
-              //     child: Stack(
-              //       children: [
-              //         ClipRRect(
-              //           borderRadius: BorderRadius.circular(16),
-              //           child: Image.file(
-              //             state.image,
-              //             width: MediaQuery.of(context).size.width - 70,
-              //             fit: BoxFit.fill,
-              //           ),
-              //         ),
-              //         Positioned(
-              //           top: 5,
-              //           right: 5,
-              //           child: DecoratedBox(
-              //             decoration: BoxDecoration(
-              //               color: Colors.white,
-              //               shape: BoxShape.circle,
-              //             ),
-              //             child: InkWell(
-              //               child: Padding(
-              //                 padding: const EdgeInsets.all(4.0),
-              //                 child: const Icon(Icons.close),
-              //               ),
-              //               onTap: () {
-              //                 chatCubit.removeImage();
-              //                 chatCubit.removeFile();
-              //                 chatCubit.removeRecord();
-              //               },
-              //             ),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // );
 
               return const SizedBox.shrink();
             },
@@ -254,7 +216,8 @@ class _HomeViewState extends State<HomeView> {
                       chatCubit.selectedFile != null ||
                       chatCubit.selectedImage != null) {
                     return IconButton(
-                      icon: const Icon(Icons.send),
+                      icon: Image.asset(AppImages.send, width: 24, height: 24),
+                      // icon: const Icon(Icons.send),
                       onPressed:
                           isLoading
                               ? null
@@ -273,10 +236,20 @@ class _HomeViewState extends State<HomeView> {
                     return GestureDetector(
                       onLongPressStart: (_) => chatCubit.startRecording(),
                       onLongPressEnd: (_) => chatCubit.stopRecordingAndSave(),
-                      child: Icon(
-                        Icons.mic,
-                        color: isRecording ? Colors.red : Colors.grey,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Image.asset(
+                          AppImages.microphone,
+                          width: 24,
+                          height: 25,
+                          color:
+                              isRecording
+                                  ? Colors.red
+                                  // : Theme.of(context).primaryColor,
+                                  : AppColors.grey4,
+                        ),
                       ),
+
                       onTap:
                           () => ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Hold to record')),
