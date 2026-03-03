@@ -4,8 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import '../chat_cubit/chat_cubit.dart';
-import '../models/message_model.dart';
+import '../cubits/chat_cubit/chat_cubit.dart';
 import '../widgets/chat_bubble_widget.dart';
 
 class HomeView extends StatefulWidget {

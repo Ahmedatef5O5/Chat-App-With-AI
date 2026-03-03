@@ -1,6 +1,6 @@
 import 'package:chat_app_with_ai/Router/app_router.dart';
 import 'package:chat_app_with_ai/Router/app_routes.dart';
-import 'package:chat_app_with_ai/chat_cubit/chat_cubit.dart';
+import 'package:chat_app_with_ai/cubits/chat_cubit/chat_cubit.dart';
 import 'package:chat_app_with_ai/firebase_options.dart';
 import 'package:chat_app_with_ai/utilities/theme/app_theme.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
