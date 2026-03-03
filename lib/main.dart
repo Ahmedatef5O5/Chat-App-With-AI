@@ -3,8 +3,10 @@ import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/cubits/chat_cubit/chat_cubit.dart';
 import 'package:chat_app_with_ai/firebase_options.dart';
 import 'package:chat_app_with_ai/utilities/theme/app_theme.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,7 +21,9 @@ void main() async {
     // providerAndroid: AndroidAppCheckProvider.playIntegrity,
   );
 
-  runApp(const MyApp());
+  runApp(
+    DevicePreview(enabled: !kReleaseMode, builder: (context) => const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -30,6 +34,10 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => ChatCubit(),
       child: MaterialApp(
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
+
         debugShowCheckedModeBanner: false,
         title: 'Chat with AI',
         theme: AppTheme.themeData,
