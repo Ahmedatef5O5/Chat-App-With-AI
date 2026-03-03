@@ -46,7 +46,8 @@ class MyApp extends StatelessWidget {
         title: 'Chat with AI',
         theme: AppTheme.themeData,
         // home: RegisterView(),
-        initialRoute: AppRoutes.register,
+        // initialRoute: AppRoutes.register,
+        initialRoute: AppRoutes.splash,
         onGenerateRoute: AppRouter.onGenerateRoute,
       ),
     );
