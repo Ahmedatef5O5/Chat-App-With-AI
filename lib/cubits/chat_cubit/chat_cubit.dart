@@ -105,7 +105,7 @@ class ChatCubit extends Cubit<ChatState> {
     final file = await _nativeService.pickFile();
     if (file != null) {
       selectedFile = file;
-      emit(FilePicked(List.from(allMessages), file));
+      emit(FilePicked(file, List.from(allMessages)));
     }
   }
 
@@ -129,9 +129,12 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> stopRecordingAndSave() async {
     final path = await _nativeService.stopRecording();
-    if (path != null) {
+    if (path != null && path.isNotEmpty) {
       selectedAudio = File(path);
       emit(RecordingStarted(List.from(allMessages), selectedAudio!));
+    } else {
+      debugPrint('Recording path is null');
+      // debugPrint('User cancel request to record');
     }
   }
 

@@ -39,14 +39,19 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _scrollController.animateTo(
-        // _scrollController.position.maxScrollExtent,
-        0.0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      ),
-    );
+    if (!_scrollController.hasClients) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.position.hasContentDimensions) return;
+      {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent, // reverse = false
+          // 0.0, // reverse = true
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   void showOptions() {
@@ -99,9 +104,12 @@ class _HomeViewState extends State<HomeView> {
                 child: BlocConsumer<ChatCubit, ChatState>(
                   listenWhen:
                       (previous, current) =>
-                          current is ChatFailure || current is ChatSuccess,
+                          current is ChatFailure ||
+                          current is ChatSuccess ||
+                          current is ChatLoading,
 
                   listener: (BuildContext context, ChatState state) {
+                    _scrollToBottom();
                     if (state is ChatFailure) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -110,19 +118,17 @@ class _HomeViewState extends State<HomeView> {
                           duration: const Duration(seconds: 3),
                         ),
                       );
-                      _scrollToBottom();
-                    } else if (state is ChatSuccess) {
-                      _scrollToBottom();
                     }
                   },
                   builder: (context, state) {
                     final messages = chatCubit.allMessages;
                     return ListView.builder(
                       controller: _scrollController,
-                      reverse: true,
+                      reverse: false,
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
-                        final message = messages.reversed.toList()[index];
+                        // final message = messages.reversed.toList()[index];
+                        final message = messages[index];
                         return ChatBubble(
                           message: message,
                           animate: index == 0,

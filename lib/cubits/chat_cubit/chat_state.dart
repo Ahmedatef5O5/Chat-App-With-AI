@@ -39,7 +39,7 @@ final class FilePicked extends ChatState {
   final File file;
   final List<MessageModel> messages;
 
-  FilePicked(this.messages, this.file);
+  FilePicked(this.file, this.messages);
 }
 
 final class FileRemoved extends ChatState {

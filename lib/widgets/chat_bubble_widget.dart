@@ -13,6 +13,9 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageFile = message.image;
+    final docFile = message.file;
+    final audioFile = message.audio;
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child:
@@ -74,7 +77,7 @@ class ChatBubble extends StatelessWidget {
                                   ? Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      if (message.image != null)
+                                      if (imageFile != null)
                                         ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             16,
@@ -90,7 +93,7 @@ class ChatBubble extends StatelessWidget {
                                             fit: BoxFit.fill,
                                           ),
                                         ),
-                                      if (message.file != null)
+                                      if (docFile != null)
                                         _buildFileBubble(
                                           icon: Icons.description,
                                           fileName:
@@ -102,7 +105,7 @@ class ChatBubble extends StatelessWidget {
                                                   ? Colors.white24
                                                   : Colors.grey.shade200,
                                         ),
-                                      if (message.audio != null)
+                                      if (audioFile != null)
                                         _buildFileBubble(
                                           icon: Icons.mic,
                                           fileName: "Voice Message",
