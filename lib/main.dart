@@ -1,8 +1,10 @@
 import 'package:chat_app_with_ai/Router/app_router.dart';
 import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/cubits/auth_cubit/auth_cubit.dart';
-import 'package:chat_app_with_ai/cubits/chat_cubit/chat_cubit.dart';
+import 'package:chat_app_with_ai/cubits/chats_cubit/chats_cubit.dart';
+import 'package:chat_app_with_ai/cubits/home_cubit/home_chat_cubit.dart';
 import 'package:chat_app_with_ai/firebase_options.dart';
+import 'package:chat_app_with_ai/services/firestore_chat_services.dart';
 import 'package:chat_app_with_ai/utilities/theme/app_theme.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -32,9 +34,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final firestoreService = FirestoreChatServices();
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => ChatCubit()),
+        BlocProvider(create: (context) => HomeChatCubit()),
+        BlocProvider(create: (context) => ChatsCubit(firestoreService)),
         BlocProvider(create: (context) => AuthCubit()),
       ],
       child: MaterialApp(
