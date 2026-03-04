@@ -1,5 +1,6 @@
 import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/widgets/custom_elevated_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -62,7 +63,14 @@ class ProfileView extends StatelessWidget {
               bgColor: Colors.red.shade100,
               txtColor: Colors.red,
               onPressed: () async {
+                //
+                await FirebaseFirestore.instance.terminate();
+                await FirebaseFirestore.instance.clearPersistence();
+
+                //
                 await FirebaseAuth.instance.signOut();
+
+                await FirebaseFirestore.instance.enableNetwork();
                 Navigator.of(
                   context,
                 ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);

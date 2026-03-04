@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chat_app_with_ai/models/message_model.dart';
 import 'package:chat_app_with_ai/services/firestore_chat_services.dart';
 import 'package:chat_app_with_ai/services/native_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,22 +25,36 @@ class HomeChatCubit extends Cubit<HomeChatState> {
   File? selectedImage, selectedFile, selectedAudio;
 
   Future<void> loadChat(String chatId) async {
-    currentChatId = chatId;
-    await _firestoreChatService.ensureChatExists(chatId);
-    final messages = await _firestoreChatService.getMessages(chatId);
-    allMessages
-      ..clear()
-      ..addAll(messages);
-    emit(HomeChatSuccess(List.from(allMessages)));
+    if (FirebaseAuth.instance.currentUser == null) return;
+    try {
+      currentChatId = chatId;
+      await _firestoreChatService.ensureChatExists(chatId);
+      final messages = await _firestoreChatService.getMessages(chatId);
+      allMessages
+        ..clear()
+        ..addAll(messages);
+      emit(HomeChatSuccess(List.from(allMessages)));
+    } catch (e) {
+      if (e.toString().contains('permission-denied')) {
+        debugPrint("Permission denied: User probably logged out.");
+        return;
+      }
+    }
   }
 
   Future<void> startNewChat() async {
-    currentChatId = await _firestoreChatService.createChat();
-    allMessages.clear();
-    emit(HomeChatInitial());
+    final chatId = await _firestoreChatService.createChat();
+    if (chatId != null) {
+      currentChatId = chatId;
+      allMessages.clear();
+      emit(HomeChatInitial());
+    } else {
+      debugPrint('Failed to create new chat');
+    }
   }
 
   Future<void> sendMessage(String userText) async {
+    if (FirebaseAuth.instance.currentUser == null) return;
     if (userText.trim().isEmpty &&
         selectedImage == null &&
         selectedFile == null &&
