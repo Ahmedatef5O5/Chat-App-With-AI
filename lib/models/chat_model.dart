@@ -35,21 +35,24 @@ class ChatModel {
       'title': title,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
-      'lastMsg': lastMsg,
+      'lastMessage': lastMsg,
     };
   }
 
   factory ChatModel.fromMap(Map<String, dynamic> map, String id) {
     return ChatModel(
-      id: map['id'] as String? ?? '',
-      title: map['title'] as String? ?? '',
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        map['createdAt'] as int? ?? 0,
-      ),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(
-        map['updatedAt'] as int? ?? 0,
-      ),
-      lastMsg: map['lastMsg'] as String? ?? '',
+      id: id,
+      // id: map['id'] as String? ?? '',
+      title: map['title'] as String? ?? 'New Chat',
+      createdAt:
+          map['createdAt'] != null
+              ? DateTime.parse(map['createdAt'])
+              : DateTime.now(),
+      updatedAt:
+          map['updatedAt'] != null
+              ? DateTime.parse(map['updatedAt'])
+              : DateTime.now(),
+      lastMsg: map['lastMessage'] as String? ?? '',
     );
   }
 
