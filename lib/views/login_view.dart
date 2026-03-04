@@ -1,6 +1,6 @@
 import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/cubits/auth_cubit/auth_cubit.dart';
-import 'package:chat_app_with_ai/cubits/chat_cubit/chat_cubit.dart';
+import 'package:chat_app_with_ai/cubits/home_cubit/home_chat_cubit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +30,7 @@ class _LoginViewState extends State<LoginView> {
     _emailController = TextEditingController();
 
     _passwordController = TextEditingController();
-    context.read<ChatCubit>().startNewChat();
+    context.read<HomeChatCubit>().startNewChat();
   }
 
   @override
@@ -149,7 +149,7 @@ class _LoginViewState extends State<LoginView> {
                                   );
                                   Navigator.of(
                                     context,
-                                  ).pushReplacementNamed(AppRoutes.chat);
+                                  ).pushReplacementNamed(AppRoutes.chatView);
                                 } else if (state is AuthFailure) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -163,13 +163,13 @@ class _LoginViewState extends State<LoginView> {
                                 if (state is AuthLoading) {
                                   return CustomElevatedButton(
                                     txtBtn: 'Login',
-                                    onpreesed: null,
+                                    onPressed: null,
                                     isLoading: true,
                                   );
                                 }
                                 return CustomElevatedButton(
                                   txtBtn: 'Login',
-                                  onpreesed: () {
+                                  onPressed: () {
                                     if (_formKey.currentState!.validate()) {
                                       context.read<AuthCubit>().login(
                                         _emailController.text,

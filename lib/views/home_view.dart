@@ -1,12 +1,13 @@
 import 'package:chat_app_with_ai/utilities/constants/app_colors.dart';
 import 'package:chat_app_with_ai/utilities/constants/app_images.dart';
+import 'package:chat_app_with_ai/widgets/chat_drawer.dart';
 import 'package:chat_app_with_ai/widgets/file_preview_widget.dart';
 import 'package:chat_app_with_ai/widgets/image_preview_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import '../cubits/chat_cubit/chat_cubit.dart';
+import '../cubits/home_cubit/home_chat_cubit.dart';
 import '../widgets/chat_bubble_widget.dart';
 
 class HomeView extends StatefulWidget {
@@ -24,7 +25,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    context.read<ChatCubit>().loadChat(ChatCubit.tempChatId);
+    context.read<HomeChatCubit>().loadChat(HomeChatCubit.tempChatId);
     _controller = TextEditingController();
     _controller.addListener(() {
       _isTyping = _controller.text.isNotEmpty;
@@ -64,20 +65,22 @@ class _HomeViewState extends State<HomeView> {
               CupertinoActionSheetAction(
                 onPressed: () {
                   Navigator.pop(context);
-                  BlocProvider.of<ChatCubit>(context).pickImageFromCamera();
+                  BlocProvider.of<HomeChatCubit>(context).pickImageFromCamera();
                 },
                 child: const Text('Camera'),
               ),
               CupertinoActionSheetAction(
                 onPressed: () {
-                  BlocProvider.of<ChatCubit>(context).pickImageFromGallery();
+                  BlocProvider.of<HomeChatCubit>(
+                    context,
+                  ).pickImageFromGallery();
                   Navigator.pop(context);
                 },
                 child: const Text('Gallery'),
               ),
               CupertinoActionSheetAction(
                 onPressed: () {
-                  BlocProvider.of<ChatCubit>(context).pickDocument();
+                  BlocProvider.of<HomeChatCubit>(context).pickDocument();
                   Navigator.pop(context);
                 },
                 child: const Text('Document (PDF/Word)'),
@@ -89,12 +92,13 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    final chatCubit = BlocProvider.of<ChatCubit>(context);
+    final chatCubit = BlocProvider.of<HomeChatCubit>(context);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        drawer: const ChatDrawer(),
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          // automaticallyImplyLeading: false,
           title: const Text('Chat view'),
           centerTitle: true,
         ),
@@ -102,16 +106,16 @@ class _HomeViewState extends State<HomeView> {
           child: Column(
             children: [
               Expanded(
-                child: BlocConsumer<ChatCubit, ChatState>(
+                child: BlocConsumer<HomeChatCubit, HomeChatState>(
                   listenWhen:
                       (previous, current) =>
-                          current is ChatFailure ||
-                          current is ChatSuccess ||
-                          current is ChatLoading,
+                          current is HomeChatFailure ||
+                          current is HomeChatSuccess ||
+                          current is HomeChatLoading,
 
-                  listener: (BuildContext context, ChatState state) {
+                  listener: (BuildContext context, HomeChatState state) {
                     _scrollToBottom();
-                    if (state is ChatFailure) {
+                    if (state is HomeChatFailure) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(state.errMessage),
@@ -148,13 +152,13 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildInputArea(BuildContext context) {
-    final chatCubit = BlocProvider.of<ChatCubit>(context);
+    final chatCubit = BlocProvider.of<HomeChatCubit>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BlocBuilder<ChatCubit, ChatState>(
+          BlocBuilder<HomeChatCubit, HomeChatState>(
             buildWhen:
                 (previous, current) =>
                     current is ImagePicked ||
@@ -212,11 +216,11 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
               ),
-              BlocBuilder<ChatCubit, ChatState>(
+              BlocBuilder<HomeChatCubit, HomeChatState>(
                 builder: (context, state) {
                   final isRecording = state is RecordingStarted;
                   final isLoading =
-                      state is ChatLoading &&
+                      state is HomeChatLoading &&
                       state.messages.isNotEmpty &&
                       state.messages.last.isLoading;
                   if (_isTyping ||
@@ -229,7 +233,7 @@ class _HomeViewState extends State<HomeView> {
                           isLoading
                               ? null
                               : () {
-                                context.read<ChatCubit>().sendMessage(
+                                context.read<HomeChatCubit>().sendMessage(
                                   _controller.text,
                                 );
                                 _controller.clear();

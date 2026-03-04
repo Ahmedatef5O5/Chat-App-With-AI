@@ -173,14 +173,14 @@ class _RegisterViewState extends State<RegisterView> {
                                 if (state is AuthLoading) {
                                   return CustomElevatedButton(
                                     txtBtn: 'Create account',
-                                    onpreesed: null,
+                                    onPressed: null,
                                     isLoading: true,
                                   );
                                 }
 
                                 return CustomElevatedButton(
                                   txtBtn: 'Create account',
-                                  onpreesed: () {
+                                  onPressed: () {
                                     if (_formKey.currentState!.validate() &&
                                         _isAgreed) {
                                       context.read<AuthCubit>().register(

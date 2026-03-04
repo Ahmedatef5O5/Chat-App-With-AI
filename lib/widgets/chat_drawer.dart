@@ -1,3 +1,4 @@
+import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/cubits/home_cubit/home_chat_cubit.dart';
 import 'package:chat_app_with_ai/models/chat_model.dart';
 import 'package:chat_app_with_ai/utilities/constants/app_colors.dart';
@@ -87,11 +88,21 @@ class ChatDrawer extends StatelessWidget {
               ),
               txtBtn: 'New chat',
 
-              onpreesed: () async {
+              onPressed: () async {
                 Navigator.of(context).pop();
                 final chatId = await chatsCubit.createNewChat();
                 chatCubit.loadChat(chatId);
               },
+            ),
+            Divider(indent: 50, endIndent: 50, color: AppColors.grey4),
+            CustomElevatedButton(
+              bgColor: Colors.greenAccent.shade700,
+              minimumSize: Size(200, 40),
+              maximumSize: Size(200, 40),
+
+              txtBtn: 'My Profile',
+              onPressed:
+                  () => Navigator.of(context).pushNamed(AppRoutes.profileView),
             ),
             Gap(20),
           ],

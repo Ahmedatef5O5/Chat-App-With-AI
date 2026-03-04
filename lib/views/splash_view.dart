@@ -36,7 +36,7 @@ class _SplashViewState extends State<SplashView> {
       if (mounted) {
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          Navigator.of(context).pushReplacementNamed(AppRoutes.chat);
+          Navigator.of(context).pushReplacementNamed(AppRoutes.chatView);
         } else {
           Navigator.of(context).pushReplacementNamed(AppRoutes.register);
         }

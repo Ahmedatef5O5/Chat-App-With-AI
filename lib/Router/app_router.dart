@@ -1,6 +1,7 @@
 import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/views/home_view.dart';
 import 'package:chat_app_with_ai/views/login_view.dart';
+import 'package:chat_app_with_ai/views/profile_view.dart';
 import 'package:chat_app_with_ai/views/splash_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,11 @@ class AppRouter {
       case AppRoutes.login:
         return CupertinoPageRoute(builder: (context) => LoginView());
 
-      case AppRoutes.chat:
+      case AppRoutes.chatView:
         return CupertinoPageRoute(builder: (context) => HomeView());
+
+      case AppRoutes.profileView:
+        return CupertinoPageRoute(builder: (context) => ProfileView());
 
       default:
         return CupertinoPageRoute(
