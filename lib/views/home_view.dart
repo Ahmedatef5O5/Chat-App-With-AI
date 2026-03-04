@@ -24,6 +24,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
+    context.read<ChatCubit>().loadChat(ChatCubit.tempChatId);
     _controller = TextEditingController();
     _controller.addListener(() {
       _isTyping = _controller.text.isNotEmpty;

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app_with_ai/models/message_model.dart';
+import 'package:chat_app_with_ai/services/firestore_chat_services.dart';
 import 'package:chat_app_with_ai/services/native_services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,12 +13,31 @@ part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit() : super(ChatInitial());
-
+  static const String tempChatId =
+      'TEMP_CHAT_ID'; // temp solution just for testing
+  late String currentChatId;
+  final _firestoreChatService = FirestoreChatServices();
   final _chatService = ChatService();
   final _nativeService = NativeServices();
 
   final List<MessageModel> allMessages = [];
   File? selectedImage, selectedFile, selectedAudio;
+
+  Future<void> loadChat(String chatId) async {
+    currentChatId = chatId;
+    await _firestoreChatService.ensureChatExists(chatId);
+    final messages = await _firestoreChatService.getMessages(chatId);
+    allMessages
+      ..clear()
+      ..addAll(messages);
+    emit(ChatSuccess(List.from(allMessages)));
+  }
+
+  Future<void> startNewChat() async {
+    currentChatId = await _firestoreChatService.createChat();
+    allMessages.clear();
+    emit(ChatInitial());
+  }
 
   Future<void> sendMessage(String userText) async {
     if (userText.trim().isEmpty &&
@@ -26,25 +46,26 @@ class ChatCubit extends Cubit<ChatState> {
         selectedAudio == null) {
       return;
     }
-    allMessages.add(
-      MessageModel(
-        text: userText,
-        isUser: true,
-        time: DateTime.now(),
-        image: selectedImage,
-        file: selectedFile,
-        audio: selectedAudio,
-      ),
+    final userMessage = MessageModel(
+      text: userText,
+      isUser: true,
+      time: DateTime.now(),
+      image: selectedImage,
+      file: selectedFile,
+      audio: selectedAudio,
     );
-    allMessages.add(
-      MessageModel(
-        text: userText,
-        isUser: false,
-        isLoading: true,
-        time: DateTime.now(),
-      ),
+    allMessages.add(userMessage);
+    _firestoreChatService.saveMessage(currentChatId, userMessage);
+
+    final botLoadingMessage = MessageModel(
+      text: userText,
+      isUser: false,
+      isLoading: true,
+      time: DateTime.now(),
     );
+    allMessages.add(botLoadingMessage);
     emit(ChatLoading(List.from(allMessages)));
+
     try {
       final aiResponse = await _chatService.sendMessage(
         userText,
@@ -52,15 +73,15 @@ class ChatCubit extends Cubit<ChatState> {
         selectedFile,
         selectedAudio,
       );
-      allMessages.removeLast();
-      allMessages.add(
-        MessageModel(
-          isUser: false,
-          text: aiResponse ?? 'No response received.',
-          time: DateTime.now(),
-        ),
+      final botMessage = MessageModel(
+        isUser: false,
+        text: aiResponse ?? 'No response received.',
+        time: DateTime.now(),
       );
+      allMessages.removeLast();
+      allMessages.add(botMessage);
 
+      _firestoreChatService.saveMessage(currentChatId, botMessage);
       // emit(ChatLoading(List.from(_allMessages)));
       selectedImage = null;
       selectedFile = null;

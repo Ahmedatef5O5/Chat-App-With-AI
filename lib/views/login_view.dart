@@ -1,5 +1,6 @@
 import 'package:chat_app_with_ai/Router/app_routes.dart';
 import 'package:chat_app_with_ai/cubits/auth_cubit/auth_cubit.dart';
+import 'package:chat_app_with_ai/cubits/chat_cubit/chat_cubit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,8 +26,11 @@ class _LoginViewState extends State<LoginView> {
   @override
   void initState() {
     super.initState();
+
     _emailController = TextEditingController();
+
     _passwordController = TextEditingController();
+    context.read<ChatCubit>().startNewChat();
   }
 
   @override
