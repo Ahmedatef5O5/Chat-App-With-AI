@@ -1,44 +1,57 @@
 import 'package:chat_app_with_ai/models/message_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:flutter/widgets.dart';
 import '../models/chat_model.dart';
 
 class FirestoreChatServices {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
 
-  String get _uid => _auth.currentUser!.uid;
+  String? get _uid => _auth.currentUser?.uid;
 
   /// create new chat
-  Future<String> createChat() async {
-    final doc =
-        _firestore.collection('users').doc(_uid).collection('chats').doc();
-    await doc.set({
-      'title': 'New Chat',
-      'createdAt': DateTime.now().toIso8601String(),
-      'updatedAt': DateTime.now().toIso8601String(),
-      'lastMessage': '',
-    });
-    return doc.id;
+  Future<String?> createChat() async {
+    final uid = _uid;
+    if (uid == null) return null;
+
+    try {
+      final doc =
+          _firestore.collection('users').doc(_uid).collection('chats').doc();
+      await doc.set({
+        'title': 'New Chat',
+        'createdAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
+        'lastMessage': '',
+      });
+      return doc.id;
+    } catch (e) {
+      debugPrint('Error creating chat: $e');
+      return null;
+    }
   }
 
   /// save message
   Future<void> saveMessage(String chatId, MessageModel message) async {
-    final chatRef = _firestore
-        .collection('users')
-        .doc(_uid)
-        .collection('chats')
-        .doc(chatId);
-    await chatRef.collection('messages').add({
-      'text': message.text,
-      'isUser': message.isUser,
-      'createdAt': message.time.toIso8601String(),
-    });
-    await chatRef.set({
-      'lastMessage': message.text,
-      'updatedAt': DateTime.now().toIso8601String(),
-    }, SetOptions(merge: true));
+    if (_auth.currentUser == null) return;
+    try {
+      final chatRef = _firestore
+          .collection('users')
+          .doc(_uid)
+          .collection('chats')
+          .doc(chatId);
+      await chatRef.collection('messages').add({
+        'text': message.text,
+        'isUser': message.isUser,
+        'createdAt': message.time.toIso8601String(),
+      });
+      await chatRef.set({
+        'lastMessage': message.text,
+        'updatedAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Caught write error after logout: $e');
+    }
   }
 
   /// get messages
@@ -107,6 +120,11 @@ class FirestoreChatServices {
 
   /// load chats list
   Stream<List<ChatModel>> chatsStream() {
+    final uid = _uid;
+    if (uid == null) {
+      return Stream.value([]);
+    }
+
     return _firestore
         .collection('users')
         .doc(_uid)

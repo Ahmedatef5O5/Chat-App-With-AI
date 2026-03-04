@@ -91,7 +91,7 @@ class ChatDrawer extends StatelessWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 final chatId = await chatsCubit.createNewChat();
-                chatCubit.loadChat(chatId);
+                chatCubit.loadChat(chatId!);
               },
             ),
             Divider(indent: 50, endIndent: 50, color: AppColors.grey4),
