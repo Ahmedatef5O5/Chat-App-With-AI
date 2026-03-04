@@ -9,10 +9,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../services/chat_services.dart';
-part 'chat_state.dart';
+part 'home_chat_state.dart';
 
-class ChatCubit extends Cubit<ChatState> {
-  ChatCubit() : super(ChatInitial());
+class HomeChatCubit extends Cubit<HomeChatState> {
+  HomeChatCubit() : super(HomeChatInitial());
   static const String tempChatId =
       'TEMP_CHAT_ID'; // temp solution just for testing
   late String currentChatId;
@@ -30,13 +30,13 @@ class ChatCubit extends Cubit<ChatState> {
     allMessages
       ..clear()
       ..addAll(messages);
-    emit(ChatSuccess(List.from(allMessages)));
+    emit(HomeChatSuccess(List.from(allMessages)));
   }
 
   Future<void> startNewChat() async {
     currentChatId = await _firestoreChatService.createChat();
     allMessages.clear();
-    emit(ChatInitial());
+    emit(HomeChatInitial());
   }
 
   Future<void> sendMessage(String userText) async {
@@ -64,7 +64,7 @@ class ChatCubit extends Cubit<ChatState> {
       time: DateTime.now(),
     );
     allMessages.add(botLoadingMessage);
-    emit(ChatLoading(List.from(allMessages)));
+    emit(HomeChatLoading(List.from(allMessages)));
 
     try {
       final aiResponse = await _chatService.sendMessage(
@@ -86,7 +86,7 @@ class ChatCubit extends Cubit<ChatState> {
       selectedImage = null;
       selectedFile = null;
       selectedAudio = null;
-      emit(ChatSuccess(List.from(allMessages)));
+      emit(HomeChatSuccess(List.from(allMessages)));
     } catch (e) {
       String errorMessage = 'An unexpected error occurred. Please try again.';
 
@@ -118,7 +118,7 @@ class ChatCubit extends Cubit<ChatState> {
           text: "Error: $errorMessage",
         ),
       );
-      emit(ChatFailure(errorMessage, List.from(allMessages)));
+      emit(HomeChatFailure(errorMessage, List.from(allMessages)));
     }
   }
 
